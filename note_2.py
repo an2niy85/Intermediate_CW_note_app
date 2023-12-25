@@ -95,25 +95,34 @@ def changeNote(fileName):  # Функция изменения информац�
         fieldnames = ["Дата", "Заметка", "Текст"]
         file_reader = csv.DictReader(r_file, fieldnames)
 
+        up_dt = []
+
         # data = sorted(file.readlines())
         # printData(file_reader)
 
-        numberNote = input("Input Number of Note for changing or 0 for return Main Menu: ")
+        title = input("Input Title of Note for changing or 0 for return Main Menu: ")
 
         for row in file_reader:
-            if row["Заметка"] == numberNote:
+            if row["Заметка"] == title:
                 print(", ".join([row["Дата"], row["Заметка"], row["Текст"]]))
+
                 newDate = input("Input new Date: ")
                 newTitle = input("Input new Title: ")
                 newText = input("Input new Text: ")
+
+                up_dt.append({'Дата':newDate, 'Заметка':newTitle, 'Текст':newText})
+            else:
+                up_dt.append(row)
+
                 # file_reader[numberNote - 1] = (
                 #         newDate + "," + newTitle + "," + newText + "\n"
                 # )
-                with open(fileName, "w", encoding="UTF-8") as w_file:
-                    file_writer = csv.DictWriter(w_file, fieldnames)
-                    file_writer.writerow({"Дата":newDate, "Заметка":newTitle, "Текст":newText})
-                    print("\nNote was successfully changed!")
-                    input("\n--- press any key ---")
+        with open(fileName, "w", encoding="UTF-8") as w_file:
+            file_writer = csv.DictWriter(w_file, fieldnames)
+            # file_writer.writerow(dict((heads,heads) for heads in fieldnames))
+            file_writer.writerows(up_dt)
+            print("\nNote was successfully changed!")
+            input("\n--- press any key ---")
 
             # else:
             #     return
@@ -121,23 +130,44 @@ def changeNote(fileName):  # Функция изменения информац�
 
 def deleteNote(fileName):  # Функция удаления контакта из телефонной книги
     os.system("cls")
-    with open(fileName, "r+", encoding="UTF-8") as file:
-        data = sorted(file.readlines())
-        printData(data)
+    with open(fileName, "r+", encoding="UTF-8") as r_file:
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_reader = csv.DictReader(r_file, fieldnames)
 
-        numberNote = int(
-            input("Input Number of Note for deleting or 0 for return Main Menu: ")
-        )
-        if numberNote != 0:
-            print(f"Deleting record: {data[numberNote - 1].rstrip().split(',')}\n")
-            data.pop(numberNote - 1)
-            with open(fileName, "w", encoding="UTF-8") as file:
-                file.write("".join(data))
+        up_dt = []
 
-        else:
-            return
+        # data = sorted(file.readlines())
+        # printData(file_reader)
 
-    input("--- press any key ---")
+        title = input("Input Title of Note for deleting or 0 for return Main Menu: ")
+
+        for row in file_reader:
+            if row["Заметка"] != title:
+                up_dt.append(row)
+
+                # file_reader[numberNote - 1] = (
+                #         newDate + "," + newTitle + "," + newText + "\n"
+                # )
+        with open(fileName, "w", encoding="UTF-8") as w_file:
+            file_writer = csv.DictWriter(w_file, fieldnames)
+            # file_writer.writerow(dict((heads,heads) for heads in fieldnames))
+            file_writer.writerows(up_dt)
+            print("\nNote was successfully delete!")
+            input("\n--- press any key ---")
+
+            # else:
+            #     return
+
+    #     if numberNote != 0:
+    #         print(f"Deleting record: {data[numberNote - 1].rstrip().split(',')}\n")
+    #         data.pop(numberNote - 1)
+    #         with open(fileName, "w", encoding="UTF-8") as file:
+    #             file.write("".join(data))
+    #
+    #     else:
+    #         return
+    #
+    # input("--- press any key ---")
 
 
 def drawInterface():  # Функция рисования интерфейса главного меню
