@@ -8,52 +8,41 @@ import os, re, csv
 
 
 def printData(data):  # Функция вывода записной книги в консоль
-    noteBook = []
-    splitLine = "=" * 49
-    print(splitLine)
-    print(" №  Date        Title          Text")
-    print(splitLine)
-    id = 1
+    count = 0
 
-    for note in data:
-        date, title, text = note.rstrip().split(",")
-        noteBook.append(
-            {
-                "ID": id,
-                "Date": date, # форматирование при выводе
-                "Title": title,
-                "Text": text,
-            }
-        )
-        id += 1
-
-    for note in noteBook:
-        id, date, title, text = note.values()
-        print(f"{id:>2}. {date:<15} {title:<10} -- {text:<15}")
-
-    print(splitLine)
+    for row in data:
+        if count == 0:
+            print(", ".join(row))
+        print(f'{row["Дата"]}, {row["Заметка"]}, {row["Текст"]}')
+        count += 1
 
 
 def showNotes(fileName):  # Функция открытия записной книги
     os.system("cls")
-    noteBook = []
-    with open(fileName, "r", encoding="UTF-8") as file:
-        data = sorted(file.readlines())
-        printData(data)
+    with open(fileName, "r", encoding="UTF-8") as r_file:
+        # data = sorted(file.readlines())
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_reader = csv.DictReader(r_file, fieldnames=fieldnames)
+
+        printData(file_reader)
+
     input("\n--- press any key ---")
 
 
 def addNote(fileName):  # Функция добавления новой заметки в записную книгу
     os.system("cls")
-    with open(fileName, "a", encoding="UTF-8") as file:
-        res = ""
-        res += input("Input a Date of Note: ") + ","
-        res += input("Input a Title of Note: ") + ","
-        res += input("Input a Text of Note: ")
+    with open(fileName, "a", encoding="UTF-8") as w_file:
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_writer = csv.DictWriter(w_file, fieldnames=fieldnames, delimiter=",", lineterminator="\r")
 
-        file.write(res + "\n")
+        date = input("Input a Date of Note: ")
+        title = input("Input a Title of Note: ")
+        text = input("Input a Text of Note: ")
+
+        file_writer.writerow({"Дата":date, "Заметка":title, "Текст":text})
 
     input("\nNote was successfully added!\n--- press any key ---")
+
 
 #
 
@@ -61,10 +50,12 @@ def findNote(fileName):  # Функция поиска заметки в зап�
     os.system("cls")
     target = input("Input Item of Note for searching: ")
     result = []
-    with open(fileName, "r", encoding="UTF-8") as file:
-        data = file.readlines()
-        for note in data:
-            if target in note:
+    with open(fileName, "r", encoding="UTF-8") as r_file:
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_reader = csv.DictReader(r_file, fieldnames)
+        #data = file.readlines()
+        for note in file_reader:
+            if target in note["Дата"]:
                 result.append(note)
                 break
 
@@ -75,14 +66,17 @@ def findNote(fileName):  # Функция поиска заметки в зап�
 
     input("--- press any key ---")
 
+
 def findNoteWithDate(fileName):  # Функция поиска заметки в записной книге
     os.system("cls")
     target = input("Input Date of Note for searching: ")
     result = []
-    with open(fileName, "r", encoding="UTF-8") as file:
-        data = file.readlines()
-        for note in data:
-            if target in note:
+    with open(fileName, "r", encoding="UTF-8") as r_file:
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_reader = csv.DictReader(r_file, fieldnames)
+        # data = file.readlines()
+        for note in file_reader:
+            if target in note["Дата"]:
                 result.append(note)
                 # break
 
@@ -97,27 +91,32 @@ def findNoteWithDate(fileName):  # Функция поиска заметки в
 def changeNote(fileName):  # Функция изменения информации в контакте
     os.system("cls")
     noteBook = []
-    with open(fileName, "r", encoding="UTF-8") as file:
-        data = sorted(file.readlines())
-        printData(data)
+    with open(fileName, "r", encoding="UTF-8") as r_file:
+        fieldnames = ["Дата", "Заметка", "Текст"]
+        file_reader = csv.DictReader(r_file, fieldnames)
 
-        numberNote = int(
-            input("Input Number of Note for changing or 0 for return Main Menu: ")
-        )
-        print(data[numberNote - 1].rstrip().split(","))
-        if numberNote != 0:
-            newDate = input("Input new Date: ")
-            newTitle = input("Input new Title: ")
-            newText = input("Input new Text: ")
-            data[numberNote - 1] = (
-                newDate + "," + newTitle + "," + newText + "\n"
-            )
-            with open(fileName, "w", encoding="UTF-8") as file:
-                file.write("".join(data))
-                print("\nNote was successfully changed!")
-                input("\n--- press any key ---")
-        else:
-            return
+        # data = sorted(file.readlines())
+        # printData(file_reader)
+
+        numberNote = input("Input Number of Note for changing or 0 for return Main Menu: ")
+
+        for row in file_reader:
+            if row["Заметка"] == numberNote:
+                print(", ".join([row["Дата"], row["Заметка"], row["Текст"]]))
+                newDate = input("Input new Date: ")
+                newTitle = input("Input new Title: ")
+                newText = input("Input new Text: ")
+                # file_reader[numberNote - 1] = (
+                #         newDate + "," + newTitle + "," + newText + "\n"
+                # )
+                with open(fileName, "w", encoding="UTF-8") as w_file:
+                    file_writer = csv.DictWriter(w_file, fieldnames)
+                    file_writer.writerow({"Дата":newDate, "Заметка":newTitle, "Текст":newText})
+                    print("\nNote was successfully changed!")
+                    input("\n--- press any key ---")
+
+            # else:
+            #     return
 
 
 def deleteNote(fileName):  # Функция удаления контакта из телефонной книги
@@ -130,7 +129,7 @@ def deleteNote(fileName):  # Функция удаления контакта и
             input("Input Number of Note for deleting or 0 for return Main Menu: ")
         )
         if numberNote != 0:
-            print(f"Deleting record: {data[numberNote-1].rstrip().split(',')}\n")
+            print(f"Deleting record: {data[numberNote - 1].rstrip().split(',')}\n")
             data.pop(numberNote - 1)
             with open(fileName, "w", encoding="UTF-8") as file:
                 file.write("".join(data))
@@ -177,7 +176,9 @@ def main(file_name):  # Функция реализации главного м�
             return
 
 
-path = "notebook.txt"
+id = 0
+
+path = "classmates.csv"
 
 main(path)
 
